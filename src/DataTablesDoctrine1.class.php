@@ -36,7 +36,6 @@ class DataTablesDoctrine1 {
      * @return array That must be parsed to JSON and shall be used by DataTables
      */
     public function getData() {
-        $recordsTotal = 0;
         self::filter();
         self::order();
         self::limit();
@@ -48,7 +47,7 @@ class DataTablesDoctrine1 {
         
         return array(
             "draw" => intval($this->request['draw']),
-            "recordsTotal" => intval($recordsTotal),
+            "recordsTotal" => intval($recordsFiltered),
             "recordsFiltered" => intval($recordsFiltered),
             "data" => self::data_output($data->getData())
         );
