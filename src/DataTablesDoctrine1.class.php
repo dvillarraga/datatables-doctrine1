@@ -39,7 +39,10 @@ class DataTablesDoctrine1 {
         self::filter();
         self::order();
         self::limit();
-        $current_page = (intval(intval($this->request['start']) / intval($this->request['length']))) + 1;
+        if(isset($this->request['start']) && isset($this->request['length']))
+            $current_page = (intval(intval($this->request['start']) / intval($this->request['length']))) + 1;
+        else
+            $current_page = 1;
         $pager = new Doctrine_Pager($this->query, $current_page, intval($this->request['length']));
         $data = $pager->execute();
         
@@ -141,19 +144,22 @@ class DataTablesDoctrine1 {
         }
 
         // Individual column filtering
-        for ($i = 0, $ien = count($this->request['columns']); $i < $ien; $i++) {
-            $requestColumn = $this->request['columns'][$i];
-            $columnIdx = array_search($requestColumn['data'], $dtColumns);
-            $column = $this->columns[$columnIdx];
-
-            $str = $requestColumn['search']['value'];
-
-            if ($requestColumn['searchable'] == 'true' && $str != '') {
-                if(  !(strpos($column['db'], "GROUP_CONCAT") !== false)  ){
-                    $columnSearch[] = $column['db'] . " LIKE '%$str%'";
+        if(isset($this->request['columns'])){
+            for ($i = 0, $ien = count($this->request['columns']); $i < $ien; $i++) {
+                $requestColumn = $this->request['columns'][$i];
+                $columnIdx = array_search($requestColumn['data'], $dtColumns);
+                $column = $this->columns[$columnIdx];
+    
+                $str = $requestColumn['search']['value'];
+    
+                if ($requestColumn['searchable'] == 'true' && $str != '') {
+                    if(  !(strpos($column['db'], "GROUP_CONCAT") !== false)  ){
+                        $columnSearch[] = $column['db'] . " LIKE '%$str%'";
+                    }
                 }
             }
         }
+        
 
         // Combine the filters into a single string
         $where = '';
